@@ -44,14 +44,14 @@
   command: "{{es_home}}/bin/elasticsearch-plugin install {{ item.plugin }} --batch --silent {% if item.proxy_host is defined and item.proxy_host != '' and item.proxy_port is defined and item.proxy_port != ''%} -DproxyHost={{ item.proxy_host }} -DproxyPort={{ item.proxy_port }} {% elif es_proxy_host is defined and es_proxy_host != '' %} -DproxyHost={{ es_proxy_host }} -DproxyPort={{ es_proxy_port }} {% endif %}"
   register: plugin_installed
   failed_when: "'ERROR' in plugin_installed.stdout"
-  changed_when: plugin_installed.rc == 0
+  changed_when: plugin_installed|succeeded
   with_items: "{{ es_plugins | default([]) }}"
   when: not es_plugins is none and es_plugins_reinstall
   notify: restart elasticsearch
   environment:
     CONF_DIR: "{{ conf_dir }}"
     ES_INCLUDE: "{{ instance_default_file }}"
-  until: plugin_installed.rc == 0
+  until: plugin_installed|succeeded
   retries: 5
   delay: 5
 
